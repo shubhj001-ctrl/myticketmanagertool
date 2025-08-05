@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Response Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      color: #333;
+    }
+    body.dark-mode {
+      background: #232526 !important;
+      color: #f4f4f4;
+    }
+    #appWrapper {
+      min-height: 100vh;
+      min-width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #mainApp {
+      width: 100vw;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h1 {
+      margin-top: 32px;
+      margin-bottom: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #232526;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    body.dark-mode h1 {
+      color: #b2dfdb;
+    }
+    .container {
+      background: rgba(255,255,255,0.95);
+      padding: 30px 35px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+      border: 2px solid #b2dfdb;
+      margin: 32px auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    body.dark-mode .container {
+      background: #232526 !important;
+      color: #f4f4f4;
+      border-color: #3949ab;
+    }
+    .login-container {
+      background: #fff;
+      padding: 32px 32px 24px 32px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px #3949ab22;
+      max-width: 350px;
+      width: 100%;
+      margin: 80px auto 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-container h2 {
+      margin-bottom: 18px;
+      color: #00796b;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .login-container input {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: 2px solid #b2dfdb;
+      font-size: 1.08rem;
+      background: #f9fbe7;
+      color: #333;
+      transition: border-color 0.3s;
+    }
+    .login-container input:focus {
+      border-color: #3949ab;
+      outline: none;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 12px 0;
+      background: linear-gradient(90deg, #00796b 60%, #26a69a 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.08rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .login-container button:hover {
+      background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
+    }
+    .login-error {
+      color: #c62828;
+      margin-bottom: 10px;
+      font-weight: 500;
+      display: none;
+    }
+    label {
+      display: block;
+      margin: 18px 0 7px;
+      font-weight: 600;
+      color: #00796b;
+      letter-spacing: 1px;
+      transition: color 0.4s;
+    }
+    body.dark-mode label { color: #80cbc4; }
+    input, select, textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid #b2dfdb;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      font-size: 1.08rem;
+      background: #f9fbe7;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    textarea#output {
+      width: 100%;
+      min-height: 120px;
+      height: auto;
+      resize: none;
+      overflow: hidden;
+      font-size: 1.08rem;
+      font-family: 'Roboto Mono', 'Roboto', monospace;
+      letter-spacing: 0.5px;
+      transition: background 0.4s, color 0.4s;
+      border-radius: 14px;
+      border: 2px solid #b2dfdb;
+      margin: 0;
+      margin-bottom: 18px;
+      padding: 18px 18px 18px 18px;
+      background: #f1fff4;
+      box-shadow: none;
+      display: block;
+    }
+    body.dark-mode textarea#output {
+      background: #181a1b !important;
+      color: #f4f4f4 !important;
+      border-color: #3949ab;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3949ab;
+      box-shadow: 0 0 16px #3949ab33;
+      outline: none;
+      background: #e3f2fd;
+      color: #222;
+    }
+    select {
+      cursor: pointer;
+      background: linear-gradient(90deg, #e0f7fa 80%, #b2dfdb 100%);
+      font-weight: 600;
+      letter-spacing: 1px;
+      border-radius: 16px;
+      border: 2.5px solid #80cbc4;
+      box-shadow: 0 6px 24px 0 #b2dfdb55;
+      padding: 15px 44px 15px 22px;
+      font-size: 1.13rem;
+      appearance: none;
+      position: relative;
+      transition:
+        background 0.4s,
+        border-color 0.3s,
+        box-shadow 0.4s;
+    }
+    select {
+      background-image:
+        linear-gradient(90deg, #e0f7fa 80%, #b2dfdb 100%),
+        url("data:image/svg+xml;utf8,<svg fill='teal' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat, no-repeat;
+      background-position: right 18px center, right 18px center;
+      background-size: auto, 28px;
+    }
+    select:focus, select:hover {
+      background: linear-gradient(90deg, #b2dfdb 80%, #e0f7fa 100%);
+      border-color: #3949ab;
+      box-shadow: 0 12px 36px #80cbc488;
+      outline: none;
+    }
+    select option {
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: #e0f7fa;
+      color: #00796b;
+      font-size: 1.08rem;
+      font-weight: 500;
+      transition: background 0.2s, color 0.2s;
+    }
+    select option:checked,
+    select option:hover {
+      background: #b2dfdb;
+      color: #3949ab;
+    }
+    body.dark-mode select {
+      background: linear-gradient(90deg, #232526 80%, #3949ab 100%);
+      color: #f4f4f4;
+      border-color: #3949ab;
+      box-shadow: 0 6px 24px 0 #3949ab55;
+      background-image:
+        linear-gradient(90deg, #232526 80%, #3949ab 100%),
+        url("data:image/svg+xml;utf8,<svg fill='aqua' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    }
+    body.dark-mode select:focus, body.dark-mode select:hover {
+      background: linear-gradient(90deg, #3949ab 80%, #232526 100%);
+      border-color: #80cbc4;
+      box-shadow: 0 12px 36px #80cbc488;
+      color: #fff;
+    }
+    body.dark-mode select option {
+      background: #232526;
+      color: #80cbc4;
+    }
+    body.dark-mode select option:checked,
+    body.dark-mode select option:hover {
+      background: #3949ab;
+      color: #fff;
+    }
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+      margin-top: 10px;
+      justify-content: flex-start;
+    }
+    button {
+      background: linear-gradient(90deg, #00796b 60%, #26a69a 100%);
+      color: white;
+      border: none;
+      padding: 11px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      font-weight: 600;
+      margin: 5px 5px 5px 0;
+      transition:
+        background 0.35s cubic-bezier(.68,-0.55,.27,1.55),
+        color 0.35s cubic-bezier(.68,-0.55,.27,1.55),
+        box-shadow 0.4s cubic-bezier(.68,-0.55,.27,1.55);
+      box-shadow: 0 2px 8px rgba(0,121,107,0.10);
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      outline: none;
+    }
+    button:hover, button:focus {
+      background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
+      color: #fff;
+      box-shadow: 0 12px 32px #3949ab33;
+    }
+    .clear-btn {
+      background: linear-gradient(90deg, #c62828 60%, #ff8a65 100%);
+    }
+    .clear-btn:hover, .clear-btn:focus {
+      background: linear-gradient(90deg, #8e0000 60%, #ff7043 100%);
+    }
+    .theme-btn {
+      background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
+    }
+    .theme-btn:hover, .theme-btn:focus {
+      background: linear-gradient(90deg, #1a237e 60%, #26a69a 100%);
+    }
+    #copyMessage {
+      transition: opacity 0.5s ease;
+      color: #2e7d32;
+      font-weight: 500;
+      margin-left: 10px;
+      display: none;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 2px #fff8;
+    }
+    body.dark-mode #copyMessage {
+      color: #80cbc4;
+      text-shadow: 1px 1px 2px #2228;
+    }
+    #entryTableContainer {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto 40px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .entry-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px #3949ab22;
+    }
+    .entry-table th, .entry-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e0f7fa;
+      text-align: left;
+      font-size: 1rem;
+    }
+    .entry-table th {
+      background: #b2dfdb;
+      color: #222;
+      font-weight: 700;
+    }
+    .entry-table tr:last-child td {
+      border-bottom: none;
+    }
+    body.dark-mode .entry-table {
+      background: #232526 !important;
+      color: #f4f4f4;
+      box-shadow: 0 2px 12px #3949ab44;
+    }
+    body.dark-mode .entry-table th {
+      background: #3949ab !important;
+      color: #fff !important;
+    }
+    body.dark-mode .entry-table td {
+      color: #f4f4f4 !important;
+    }
+    .table-actions {
+      display: flex;
+      gap: 16px;
+      margin: 18px 0 0 0;
+      justify-content: flex-start;
+      width: 100%;
+      max-width: 800px;
+    }
+    .past-entries-section {
+      margin: 40px auto 0 auto;
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 24px 24px 18px 24px;
+      box-shadow: 0 4px 24px #3949ab11;
+    }
+    body.dark-mode .past-entries-section {
+      background: #232526;
+      color: #f4f4f4;
+    }
+    .past-entries-section h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 1.2rem;
+      color: #3949ab;
+    }
+    body.dark-mode .past-entries-section h2 {
+      color: #80cbc4;
+    }
+    #pastDateSelect {
+      max-width: 220px;
+      margin-bottom: 16px;
+    }
+    #logoutBtn {
+      position: fixed;
+      top: 24px;
+      right: 32px;
+      z-index: 1000;
+      background: linear-gradient(90deg, #00796b 60%, #26a69a 100%);
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.18rem;
+      font-weight: 700;
+      padding: 12px 32px;
+      box-shadow: 0 2px 12px #3949ab22;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: none;
+    }
+    #logoutBtn:hover {
+      background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
+    }
+    body.dark-mode #logoutBtn {
+      background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
+  <div id="appWrapper">
+    <div id="loginPage" class="login-container">
+      <h2>Login</h2>
+      <div class="login-error" id="loginError">Invalid ID or Password</div>
+      <input type="text" id="loginId" placeholder="User ID" autocomplete="username" />
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <div id="mainApp" style="display:none;">
+      <h1>🎟️ Ticket Response Generator</h1>
+      <div class="container">
+        <label for="clientName">Client Name:</label>
+        <input type="text" id="clientName" placeholder="Enter client name" />
+
+        <label for="scenario">Select Scenario:</label>
+        <select id="scenario">
+          <option value="">-- Select --</option>
+          <option value="initial">Initial Response</option>
+          <option value="followup">Follow-up Response</option>
+          <option value="closure">Closing Response</option>
+          <option value="meeting">Meeting Booking Response</option>
+          <option value="dev">Dev Created</option>
+        </select>
+
+        <label for="response">Select Response:</label>
+        <select id="response">
+          <option value="">-- Select Scenario First --</option>
+        </select>
+
+        <div class="button-group">
+          <button onclick="generateResponse()">Generate Response</button>
+          <button onclick="copyResponse()">Copy to Clipboard</button>
+          <span id="copyMessage">✔️ Copied!</span>
+          <button class="clear-btn" onclick="clearResponse()">Clear Response</button>
+          <button class="theme-btn" onclick="toggleTheme()">Toggle Theme</button>
+        </div>
+
+        <label for="output">Generated Response:</label>
+        <textarea id="output" readonly></textarea>
+      </div>
+
+      <button id="logoutBtn" style="align-self: flex-end; margin: 18px 0 0 0;" onclick="logout()">Logout</button>
+
+      <div id="entryTableContainer"></div>
+
+      <div class="table-actions">
+        <button class="clear-btn" onclick="clearTodayTable()">Clear Table</button>
+        <button onclick="saveTodayTable()">Save Table for Today</button>
+      </div>
+
+      <div class="past-entries-section">
+        <h2>📅 Past Entries</h2>
+        <div>
+          <label for="pastDateSelect">Select Date:</label>
+          <select id="pastDateSelect" onchange="showPastEntries()">
+            <option value="">-- Select Date --</option>
+          </select>
+        </div>
+        <div id="pastEntriesTableContainer"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // LOGIN LOGIC
+    function login() {
+      const id = document.getElementById("loginId").value.trim();
+      const pass = document.getElementById("loginPass").value;
+      const error = document.getElementById("loginError");
+      if (id === "shubhj" && pass === "Shubh@0924") {
+        localStorage.setItem("isLoggedIn", "true");
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("mainApp").style.display = "";
+        showLogoutBtn(true);
+        // Restore dark mode if set
+        if (localStorage.getItem("darkMode") === "true") {
+          document.body.classList.add("dark-mode");
+        }
+        setTimeout(() => document.getElementById("clientName").focus(), 100);
+        renderEntryTable();
+      } else {
+        error.style.display = "block";
+      }
+    }
+    document.getElementById("loginPass").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") login();
+    });
+    document.getElementById("loginId").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") login();
+    });
+
+    // MAIN APP LOGIC
+    const responseTemplates = {
+      initial: {
+        "Initial 1": `Hi {client},\n\nThank you for contacting Mindmatrix Support.\n\nWe’ve received your request and are currently reviewing it. Please expect an update from us shortly.\n\nBest regards,`
+      },
+      followup: {
+        "Follow-up 1": `Hi {client},\n\nHope you are doing well.\n\nCould you please review our previous response and share your feedback on that?\n\nLooking forward to your update!`,
+        "Follow-up 2 (Includes Closing)": `Hi {client},\n\nHope you’re doing well.\n\nCould you please review our previous response and share your feedback? Just wanted to confirm if everything’s clear so we can go ahead and close this ticket.\n\nLooking forward to hearing from you!`
+      },
+      closure: {
+        "Closing 1": `Hi {client},\n\nHope you’re doing well!\n\nThank you for the feedback. We’ll go ahead and close the ticket for now.\n\nIf you need any further assistance, feel free to reach out — we’ll be happy to assist you.\n\nHave a great day ahead!\n\nBest regards,`,
+        "Closing 2 (No Response)": `Hi {client},\n\nAs we haven't received any response from you, we will now go ahead and close this ticket.\n\nIf you have any further query, you can reopen this ticket for help. We will be happy to assist you.\n\nHave a great day ahead!`
+      },
+      meeting: {
+        "Meeting Request": `Hi {client},\n\nHope you are doing well,\n\nCould you please share your availability for a quick call to resolve your concern?\n\nLooking forward to your response.\n\nBest regards,`
+      },
+      dev: {
+        "Escalated to Dev": `Hi {client},\n\nA quick update regarding your concern.\n\nWe were able to replicate the issue on our end and have escalated it to our development team for further investigation. We’ll keep you informed as soon as we receive any updates from them.\n\nIn the meantime, if you have any further questions or concerns, please feel free to reach out.\n\nBest regards,`
+      }
+    };
+
+    function autoResizeOutput() {
+      const output = document.getElementById("output");
+      output.style.height = "auto";
+      output.style.height = output.scrollHeight + "px";
+    }
+
+    // Load saved values from localStorage on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      // Only run if mainApp is visible (after login)
+      if (document.getElementById("mainApp").style.display === "none") return;
+
+      const clientName = localStorage.getItem("clientName") || "";
+      const scenario = localStorage.getItem("scenario") || "";
+      const response = localStorage.getItem("response") || "";
+      const output = localStorage.getItem("output") || "";
+      const darkMode = localStorage.getItem("darkMode") === "true";
+
+      document.getElementById("clientName").value = clientName;
+      document.getElementById("scenario").value = scenario;
+
+      // Trigger scenario change to populate responses
+      if (scenario) {
+        const responseDropdown = document.getElementById("response");
+        responseDropdown.innerHTML = "";
+        Object.keys(responseTemplates[scenario]).forEach(key => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = key;
+          responseDropdown.appendChild(option);
+        });
+        document.getElementById("response").value = response;
+      }
+
+      document.getElementById("output").value = output;
+      if (output) document.getElementById("output").style.background = "#e8f5e9";
+      if (darkMode) document.body.classList.add("dark-mode");
+      autoResizeOutput();
+      renderEntryTable();
+    });
+
+    // Auto-login if already logged in
+    window.addEventListener("DOMContentLoaded", function() {
+      if (localStorage.getItem("isLoggedIn") === "true") {
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("mainApp").style.display = "";
+        if (localStorage.getItem("darkMode") === "true") {
+          document.body.classList.add("dark-mode");
+        }
+        renderEntryTable();
+        updatePastDatesDropdown();
+      }
+    });
+
+    // Save values to localStorage on change
+    document.getElementById("clientName").addEventListener("input", function() {
+      localStorage.setItem("clientName", this.value);
+    });
+
+    document.getElementById("scenario").addEventListener("change", function(){
+      const scenario = this.value;
+      localStorage.setItem("scenario", scenario);
+      const responseDropdown = document.getElementById("response");
+      responseDropdown.innerHTML = "";
+      if(!scenario || !responseTemplates[scenario]){
+        responseDropdown.innerHTML = `<option value="">-- Select Scenario First --</option>`;
+        localStorage.setItem("response", "");
+        return;
+      }
+      Object.keys(responseTemplates[scenario]).forEach(key => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = key;
+        responseDropdown.appendChild(option);
+      });
+      localStorage.setItem("response", "");
+    });
+
+    document.getElementById("response").addEventListener("change", function() {
+      localStorage.setItem("response", this.value);
+    });
+
+    function generateResponse(){
+      const clientName = document.getElementById("clientName").value || "Client";
+      const scenario = document.getElementById("scenario").value;
+      const responseKey = document.getElementById("response").value;
+      const output = document.getElementById("output");
+      if(!scenario || !responseKey){
+        output.value = "Please select a scenario and response.";
+        localStorage.setItem("output", output.value);
+        autoResizeOutput();
+        return;
+      }
+      let template = responseTemplates[scenario][responseKey];
+      output.value = template.replace(/{client}/gi, clientName);
+      output.style.background = "#e8f5e9";
+      localStorage.setItem("output", output.value);
+      autoResizeOutput();
+
+      // Save entry to table
+      saveEntry({
+        client: clientName,
+        scenario: scenario,
+        response: responseKey,
+        generated: output.value,
+        time: new Date().toLocaleString()
+      });
+      renderEntryTable();
+    }
+
+    function copyResponse(){
+      const output = document.getElementById("output");
+      const copyMsg = document.getElementById("copyMessage");
+      if(!output.value.trim()) return;
+      navigator.clipboard.writeText(output.value).then(()=>{
+        copyMsg.style.display = "inline";
+        copyMsg.style.opacity = "1";
+        setTimeout(()=>{
+          copyMsg.style.opacity = "0";
+          setTimeout(()=>copyMsg.style.display = "none", 500);
+        }, 2000);
+      });
+    }
+
+    function clearResponse(){
+      const output = document.getElementById("output");
+      output.value = "";
+      output.style.background = "#ffffff";
+      localStorage.setItem("output", "");
+      autoResizeOutput();
+    }
+
+    function toggleTheme(){
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+      renderEntryTable();
+    }
+
+    // --- Table Logic ---
+    function saveEntry(entry) {
+      let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+      entries.push(entry);
+      localStorage.setItem("entries", JSON.stringify(entries));
+    }
+
+    function renderEntryTable() {
+      let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+      if (!entries.length) {
+        document.getElementById("entryTableContainer").innerHTML = "";
+        return;
+      }
+      let html = `<table class="entry-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Scenario</th>
+            <th>Response</th>
+            <th>Generated Text</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map((e,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td>${e.client}</td>
+              <td>${capitalize(e.scenario)}</td>
+              <td>${e.response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
+              <td>${e.time}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+      document.getElementById("entryTableContainer").innerHTML = html;
+    }
+
+    // --- Table Actions ---
+
+    function clearTodayTable() {
+      if (confirm("Are you sure you want to clear today's table?")) {
+        localStorage.removeItem("entries");
+        renderEntryTable();
+      }
+    }
+
+    function saveTodayTable() {
+      let entries = JSON.parse(localStorage.getItem("entries") || "[]");
+      if (!entries.length) {
+        alert("No entries to save for today.");
+        return;
+      }
+      const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+      let allSaved = JSON.parse(localStorage.getItem("savedTables") || "{}");
+      allSaved[today] = entries;
+      localStorage.setItem("savedTables", JSON.stringify(allSaved));
+      alert("Today's table saved!");
+      updatePastDatesDropdown();
+    }
+
+    function updatePastDatesDropdown() {
+      const select = document.getElementById("pastDateSelect");
+      if (!select) return;
+      const allSaved = JSON.parse(localStorage.getItem("savedTables") || "{}");
+      select.innerHTML = `<option value="">-- Select Date --</option>`;
+      Object.keys(allSaved).sort((a,b)=>b.localeCompare(a)).forEach(date => {
+        const opt = document.createElement("option");
+        opt.value = date;
+        opt.textContent = date;
+        select.appendChild(opt);
+      });
+    }
+
+    function showPastEntries() {
+      const date = document.getElementById("pastDateSelect").value;
+      const container = document.getElementById("pastEntriesTableContainer");
+      if (!date) {
+        container.innerHTML = "";
+        return;
+      }
+      const allSaved = JSON.parse(localStorage.getItem("savedTables") || "{}");
+      const entries = allSaved[date] || [];
+      if (!entries.length) {
+        container.innerHTML = "<div>No entries for this date.</div>";
+        return;
+      }
+      let html = `<table class="entry-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Client</th>
+            <th>Scenario</th>
+            <th>Response</th>
+            <th>Generated Text</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map((e,i)=>`
+            <tr>
+              <td>${i+1}</td>
+              <td>${e.client}</td>
+              <td>${capitalize(e.scenario)}</td>
+              <td>${e.response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
+              <td>${e.time}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>`;
+      container.innerHTML = html;
+    }
+
+    // Update dropdown on load
+    window.addEventListener("DOMContentLoaded", updatePastDatesDropdown);
+
+    function capitalize(str) {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function showLogoutBtn(show) {
+      document.getElementById("logoutBtn").style.display = show ? "block" : "none";
+    }
+
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      showLogoutBtn(false);
+      location.reload();
+    }
+  </script>
+</body>
+</html>
