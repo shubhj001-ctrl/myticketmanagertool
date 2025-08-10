@@ -854,11 +854,11 @@
 
     // Test entry (remove this block in production)
     supabase.from('entries').insert([{
-      client: "Test",
-      scenario: "Test",
-      response: "Test",
-      generated: "Test entry",
-      time: new Date().toLocaleString()
+      Client: "Test",
+      Scenario: "Test",
+      Response: "Test",
+      Generated: "Test entry",
+      Time: new Date().toLocaleString()
     }]).then(console.log)
   </script>
 </body>
