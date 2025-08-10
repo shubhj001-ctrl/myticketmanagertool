@@ -631,7 +631,7 @@
       localStorage.setItem("response", this.value);
     });
 
-    function generateResponse(){
+    async function generateResponse(){
       const clientName = document.getElementById("clientName").value || "Client";
       const scenario = document.getElementById("scenario").value;
       const responseKey = document.getElementById("response").value;
@@ -648,13 +648,13 @@
       localStorage.setItem("output", output.value);
       autoResizeOutput();
 
-      // Save entry to table
-      saveEntry({
-        client: clientName,
-        scenario: scenario,
-        response: responseKey,
-        generated: output.value,
-        time: new Date().toLocaleString()
+      // Save entry to table (await so Supabase insert completes)
+      await saveEntry({
+        Client: clientName,
+        Scenario: scenario,
+        Response: responseKey,
+        Generated: output.value,
+        Time: new Date().toLocaleString()
       });
       renderEntryTable();
     }
@@ -695,18 +695,15 @@
       localStorage.setItem("entries", JSON.stringify(entries));
 
       // Save to Supabase
-      const { error } = await supabase.from('entries').insert([entry]);
+      const { error } = await supabase.from('Entries').insert([entry]);
       if (error) {
+        alert('Supabase insert error: ' + error.message);
         console.error('Supabase insert error:', error);
       }
     }
 
     async function renderEntryTable() {
-      const { data, error } = await supabase.from('entries').select('*').order('id', { ascending: true });
-      if (error) {
-        console.error('Supabase fetch error:', error);
-        return;
-      }
+      const { data, error } = await supabase.from('Entries').select('*').order('id', { ascending: true });
       let entries = data || [];
       if (!entries.length) {
         document.getElementById("entryTableContainer").innerHTML = "";
@@ -727,11 +724,11 @@
           ${entries.map((e,i)=>`
             <tr>
               <td>${i+1}</td>
-              <td>${e.client}</td>
-              <td>${capitalize(e.scenario)}</td>
-              <td>${e.response}</td>
-              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
-              <td>${e.time}</td>
+              <td>${e.Client}</td>
+              <td>${capitalize(e.Scenario)}</td>
+              <td>${e.Response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.Generated}</td>
+              <td>${e.Time}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -803,11 +800,11 @@
           ${entries.map((e,i)=>`
             <tr>
               <td>${i+1}</td>
-              <td>${e.client}</td>
-              <td>${capitalize(e.scenario)}</td>
-              <td>${e.response}</td>
-              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
-              <td>${e.time}</td>
+              <td>${e.Client}</td>
+              <td>${capitalize(e.Scenario)}</td>
+              <td>${e.Response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.Generated}</td>
+              <td>${e.Time}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -854,6 +851,15 @@
     const supabaseUrl = 'https://pftlezmdellbcfwpmrbl.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdGxlem1kZWxsYmNmd3BtcmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MDU2ODAsImV4cCI6MjA3MDM4MTY4MH0.BM13MGrdp58TupW6kyaJcmwTGL7Eu4-Kcj0LtCuHBAA'; // <-- paste your anon key here
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Test entry (remove this block in production)
+    supabase.from('entries').insert([{
+      client: "Test",
+      scenario: "Test",
+      response: "Test",
+      generated: "Test entry",
+      time: new Date().toLocaleString()
+    }]).then(console.log)
   </script>
 </body>
 </html>
