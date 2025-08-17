@@ -382,32 +382,22 @@
       max-width: 220px;
       margin-bottom: 16px;
     }
-    #logoutWrapper {
+    #logoutBtn {
       position: fixed;
       top: 24px;
       right: 32px;
       z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #logoutBtn {
       background: linear-gradient(90deg, #00796b 60%, #26a69a 100%);
       color: #fff;
       border: none;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      font-size: 1.4rem;
+      border-radius: 16px;
+      font-size: 1.18rem;
       font-weight: 700;
+      padding: 12px 32px;
       box-shadow: 0 2px 12px #3949ab22;
       cursor: pointer;
       transition: background 0.3s;
       display: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
     }
     #logoutBtn:hover {
       background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
@@ -416,32 +406,13 @@
       background: linear-gradient(90deg, #3949ab 60%, #80cbc4 100%);
       color: #fff;
     }
-    #logoutText {
-      margin-top: 6px;
-      font-size: 1rem;
-      font-weight: 600;
-      color: #00796b;
-      background: transparent;
-      pointer-events: none;
-      text-align: center;
-      display: none;
-    }
-    body.dark-mode #logoutText {
-      color: #80cbc4;
-    }
   </style>
 </head>
 <body>
-  <div id="logoutWrapper">
-    <button id="logoutBtn" onclick="logout()" title="Logout">⎋</button>
-    <span id="logoutText">Logout</span>
-  </div>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
   <div id="appWrapper">
     <div id="loginPage" class="login-container">
       <h2>Login</h2>
-      <div style="margin-bottom: 10px; font-size: 1.18rem; color: #00796b; font-weight: 600; text-align: center;">
-        Welcome Shubham
-      </div>
       <div class="login-error" id="loginError">Invalid ID or Password</div>
       <input type="text" id="loginId" placeholder="User ID" autocomplete="username" />
       <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" />
@@ -481,6 +452,8 @@
         <textarea id="output" readonly></textarea>
       </div>
 
+      <button id="logoutBtn" style="align-self: flex-end; margin: 18px 0 0 0;" onclick="logout()">Logout</button>
+
       <div id="entryTableContainer"></div>
 
       <div class="table-actions">
@@ -500,7 +473,6 @@
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
     // LOGIN LOGIC
     function login() {
@@ -631,7 +603,7 @@
       localStorage.setItem("response", this.value);
     });
 
-    async function generateResponse(){
+    function generateResponse(){
       const clientName = document.getElementById("clientName").value || "Client";
       const scenario = document.getElementById("scenario").value;
       const responseKey = document.getElementById("response").value;
@@ -648,13 +620,13 @@
       localStorage.setItem("output", output.value);
       autoResizeOutput();
 
-      // Save entry to table (await so Supabase insert completes)
-      await saveEntry({
-        Client: clientName,
-        Scenario: scenario,
-        Response: responseKey,
-        Generated: output.value,
-        Time: new Date().toLocaleString()
+      // Save entry to table
+      saveEntry({
+        client: clientName,
+        scenario: scenario,
+        response: responseKey,
+        generated: output.value,
+        time: new Date().toLocaleString()
       });
       renderEntryTable();
     }
@@ -688,23 +660,14 @@
     }
 
     // --- Table Logic ---
-    async function saveEntry(entry) {
-      // Save locally as before
+    function saveEntry(entry) {
       let entries = JSON.parse(localStorage.getItem("entries") || "[]");
       entries.push(entry);
       localStorage.setItem("entries", JSON.stringify(entries));
-
-      // Save to Supabase
-      const { error } = await supabase.from('Entries').insert([entry]);
-      if (error) {
-        alert('Supabase insert error: ' + error.message);
-        console.error('Supabase insert error:', error);
-      }
     }
 
-    async function renderEntryTable() {
-      const { data, error } = await supabase.from('Entries').select('*').order('id', { ascending: true });
-      let entries = data || [];
+    function renderEntryTable() {
+      let entries = JSON.parse(localStorage.getItem("entries") || "[]");
       if (!entries.length) {
         document.getElementById("entryTableContainer").innerHTML = "";
         return;
@@ -724,11 +687,11 @@
           ${entries.map((e,i)=>`
             <tr>
               <td>${i+1}</td>
-              <td>${e.Client}</td>
-              <td>${capitalize(e.Scenario)}</td>
-              <td>${e.Response}</td>
-              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.Generated}</td>
-              <td>${e.Time}</td>
+              <td>${e.client}</td>
+              <td>${capitalize(e.scenario)}</td>
+              <td>${e.response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
+              <td>${e.time}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -800,11 +763,11 @@
           ${entries.map((e,i)=>`
             <tr>
               <td>${i+1}</td>
-              <td>${e.Client}</td>
-              <td>${capitalize(e.Scenario)}</td>
-              <td>${e.Response}</td>
-              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.Generated}</td>
-              <td>${e.Time}</td>
+              <td>${e.client}</td>
+              <td>${capitalize(e.scenario)}</td>
+              <td>${e.response}</td>
+              <td style="white-space:pre-line;max-width:320px;word-break:break-word;">${e.generated}</td>
+              <td>${e.time}</td>
             </tr>
           `).join("")}
         </tbody>
@@ -822,7 +785,6 @@
 
     function showLogoutBtn(show) {
       document.getElementById("logoutBtn").style.display = show ? "block" : "none";
-      document.getElementById("logoutText").style.display = show ? "block" : "none";
     }
 
     function logout() {
@@ -830,36 +792,6 @@
       showLogoutBtn(false);
       location.reload();
     }
-
-    window.addEventListener("DOMContentLoaded", function() {
-      if (localStorage.getItem("isLoggedIn") === "true") {
-        showLogoutBtn(true);
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("mainApp").style.display = "";
-        if (localStorage.getItem("darkMode") === "true") {
-          document.body.classList.add("dark-mode");
-        }
-        renderEntryTable();
-        updatePastDatesDropdown();
-      } else {
-        showLogoutBtn(false);
-        document.getElementById("loginPage").style.display = "";
-        document.getElementById("mainApp").style.display = "none";
-      }
-    });
-
-    const supabaseUrl = 'https://pftlezmdellbcfwpmrbl.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmdGxlem1kZWxsYmNmd3BtcmJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MDU2ODAsImV4cCI6MjA3MDM4MTY4MH0.BM13MGrdp58TupW6kyaJcmwTGL7Eu4-Kcj0LtCuHBAA'; // <-- paste your anon key here
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-    // Test entry (remove this block in production)
-    supabase.from('entries').insert([{
-      Client: "Test",
-      Scenario: "Test",
-      Response: "Test",
-      Generated: "Test entry",
-      Time: new Date().toLocaleString()
-    }]).then(console.log)
   </script>
 </body>
 </html>
